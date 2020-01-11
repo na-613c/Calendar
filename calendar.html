@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Calendar</title>
+  <style type="text/css">
+    table#calendar {
+      position: absolute;
+      top: 20%;
+      left: 35%;
+      width: 30%;
+      height: 40%;
+      text-align: center;
+      border: 1px solid black;
+      border-radius: 5px 5px 5px 5px;
+      padding: 10px;
+    }
+
+    th {
+      padding: 3px;
+      text-align: center;
+      background: rgb(90, 88, 88);
+      color: white;
+    }
+
+    #first {
+      border-radius: 8px 0 0 8px;
+    }
+
+    #last {
+      border-radius: 0 8px 8px 0;
+    }
+
+    .cursor {
+      cursor: pointer;
+    }
+
+    tr {
+      text-align: center;
+    }
+
+    .other {
+      color: rgba(158, 158, 158, 0.993);
+    }
+
+    .thisDay {
+      background: rgb(178, 197, 191);
+      border-radius: 10px 10px 10px 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <table cellpadding="7" id="calendar"></table>
+  <script type="text/javascript">
+    let tap = 0,
+      countYears = 0;
+    let today = new Date;
+    let todayYear = today.getFullYear();
+    let todayMonth = today.getMonth() + 1;
+    let monthNames = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    class CreateCalendar {
+
+      createT(year, month) {
+
+        let getDay = (date) => {
+          let day = date.getDay();
+          date.getDay() == 0 ? (day = 7) : (day);
+          return day - 1;
+        }
+
+        let elem = document.getElementById("calendar");
+        let mon = --month;
+        let d = new Date(year, mon);
+        let prevD = new Date(year, --mon);
+        let nextD = new Date(year, ++mon);
+        let now = new Date();
+        let table =
+        `<tr><td align="left" class = "cursor" onclick="createCalendar.prevMonth(todayYear, todayMonth)">⟵</td><td colspan="5" align="center">
+        ${monthNames[mon]} ${year} </td><td align="right" class = "cursor" onclick="createCalendar.nextMonth(todayYear, todayMonth)">⟶</td></tr>
+        <tr><th id="first">Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th><b>Sat</b></th><th id="last"><b>Sun</b></th></tr><tr>`;
+
+        let getLastDayOfMonth = (year, month) => (new Date(year, month + 1, 0).getDate());
+        // считаем даты для заполнения значений перед текущим месяцем
+        let days = getLastDayOfMonth(prevD.getFullYear(), prevD.getMonth()) - getDay(d) + 1;
+        // заполняем место перед текущим месяцем
+        for (let i = 0; i < getDay(d); i++) {
+          table += `<td class = "other"> ${days} </td>`;
+          days++;
+        }
+
+      // ячейки календаря с датами
+      while (d.getMonth() == mon) {
+        if (now.getDate() == d.getDate() && now.getMonth() == d.getMonth() && now.getFullYear() == d.getFullYear()) {
+          table += `<td class="thisDay">${d.getDate()}</td>`;
+        } else {
+          table +=  `<td> ${d.getDate()} </td>`; 
+        }
+
+        if (getDay(d) % 7 == 6) { // вс, последний день - перевод строки
+          table += '</tr><tr>';
+        }
+
+        d.setDate(d.getDate() + 1);
+      }
+
+      // добить таблицу после текущего месяца
+      if (getDay(d) != 0) {
+        for (let i = getDay(d); i < 7; i++) {
+          table += `<td class = "other"> ${nextD.getDate()} </td>`;
+          nextD.setDate(nextD.getDate() + 1);
+        }
+      }
+      table += '</tr>';
+
+      elem.innerHTML = table;
+      }
+
+
+      prevMonth(todayYear, todayMonth) {
+        tap--;
+        todayMonth += tap;
+        if (todayMonth % 12 == 0) {
+          countYears--;
+        }
+        todayMonth = todayMonth % 12;
+        if (todayMonth < 1) {
+          todayMonth += 12;
+        }
+
+        todayYear += countYears;
+        createCalendar.createT(todayYear, todayMonth);
+      }
+
+      nextMonth(todayYear, todayMonth) {
+        tap++;
+        todayMonth = (todayMonth + tap) % 12;
+        if (todayMonth < 1) {
+          todayMonth += 12;
+        }
+        if (todayMonth == 1) {
+          countYears++;
+        }
+        todayYear += countYears;
+        createCalendar.createT(todayYear, todayMonth);
+      }
+    }
+
+    let createCalendar = new CreateCalendar();
+    createCalendar.createT(todayYear, todayMonth);
+  </script>
+
+
+</body>
+
+</html>
